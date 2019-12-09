@@ -12,36 +12,79 @@ import {
 import { PoppinsBold, PoppinsRegular } from '../../Theme/fonts'
 import { colors } from '../../Theme/colors'
 import { Input, Form, Label, Item, Button } from 'native-base'
+import { Auth, Database } from '../../Configs/Firebase'
 
-const Login = ({ navigation }) => {
+const Register = ({ navigation }) => {
 	const [email, setEmail] = useState('')
+	const [name, setName] = useState('')
 	const [password, setPassword] = useState('')
+	const [password2, setPassword2] = useState('')
 	const [loading, setLoading] = useState(false)
 	const [error, setError] = useState(null)
 
-	const onSubmit = () => {
-		if (email === '' && password === '') {
+	const onSubmit = async () => {
+		if (email === '' && password === '' && password2 === '' && name === '') {
 			setError({
+				name: 'Name Cannot Empty',
 				email: 'Email Cannot Empty',
 				password: 'Password Cannot Empty',
+				password2: 'Password Cannot Empty',
 			})
 		} else if (password === '') {
 			setError({ password: 'Password Cannot Empty' })
 		} else if (password.length < 6) {
 			setError({ password: 'Password Should Greater Than 6' })
+		} else if (password2 !== password) {
+			setError({ password2: 'Password Not Match' })
 		} else {
+			try {
+				setLoading(true)
+				const response = await Auth.createUserWithEmailAndPassword(
+					email,
+					password
+				)
+				response.user.updateProfile({
+					displayName: name,
+				})
+
+				await Database.ref('/user/' + response.user.uid).set({
+					id: response.user.uid,
+					name,
+					status: 'Offline',
+					email,
+					avatar:
+						'https://res.cloudinary.com/iyansrcloud/image/upload/v1575295609/upload/genre-icon/comedy_io7bh2.png',
+				})
+				ToastAndroid.show(
+					'Your account is successfully registered!',
+					ToastAndroid.LONG
+				)
+				navigation.replace('ChatList')
+				setLoading(false)
+			} catch (error) {
+				setError(null)
+				setEmail('')
+				setName('')
+				setPassword('')
+				setPassword2('')
+				ToastAndroid.show('Error', ToastAndroid.LONG)
+				setLoading(false)
+
+				console.log(error)
+			}
+			// setError(null)
 			// ToastAndroid.show('Succes', ToastAndroid.SHORT)
-			// navigation.navigate('ChatList')
-			setLoading(true)
-			console.log(email)
+			// // navigation.replace('ChatList')
+			// console.log(email)
 		}
 	}
 
 	const onClear = () => {
 		setError(null)
 		setEmail('')
+		setName('')
 		setPassword('')
-		setLoading(false)
+		setPassword2('')
 	}
 
 	return (
@@ -49,9 +92,21 @@ const Login = ({ navigation }) => {
 			<StatusBar backgroundColor={colors.white} barStyle='dark-content' />
 			<ScrollView showsVerticalScrollIndicator={false}>
 				<View style={styles.container}>
-					<Text style={styles.bigText}>Welcome Back,</Text>
-					<Text style={styles.smallText}>Sign in to continue</Text>
+					<Text style={styles.bigText}>Hello There,</Text>
+					<Text style={styles.smallText}>Sign up to continue</Text>
 					<Form style={{ marginTop: 20 }}>
+						<Item floatingLabel style={{ marginLeft: 0 }}>
+							<Label style={styles.label}>Name</Label>
+							<Input
+								selectionColor={colors.purple}
+								style={styles.input}
+								value={name}
+								keyboardType='email-address'
+								onChangeText={val => setName(val)}
+							/>
+						</Item>
+						{error && <Text style={styles.errorMsg}>{error.name}</Text>}
+
 						<Item floatingLabel style={{ marginLeft: 0 }}>
 							<Label style={styles.label}>Email</Label>
 							<Input
@@ -63,6 +118,7 @@ const Login = ({ navigation }) => {
 							/>
 						</Item>
 						{error && <Text style={styles.errorMsg}>{error.email}</Text>}
+
 						<Item floatingLabel style={{ marginLeft: 0 }}>
 							<Label style={styles.label}>Password</Label>
 							<Input
@@ -74,6 +130,19 @@ const Login = ({ navigation }) => {
 							/>
 						</Item>
 						{error && <Text style={styles.errorMsg}>{error.password}</Text>}
+
+						<Item floatingLabel style={{ marginLeft: 0 }}>
+							<Label style={styles.label}>Confirm Password</Label>
+							<Input
+								selectionColor={colors.purple}
+								style={styles.input}
+								value={password2}
+								secureTextEntry={true}
+								onChangeText={val => setPassword2(val)}
+							/>
+						</Item>
+						{error && <Text style={styles.errorMsg}>{error.password2}</Text>}
+
 						<View style={styles.clearContainer}>
 							<Text style={styles.clear} onPress={onClear}>
 								Clear
@@ -82,7 +151,7 @@ const Login = ({ navigation }) => {
 					</Form>
 					{!loading ? (
 						<Button style={styles.button} onPress={onSubmit}>
-							<Text style={styles.btnText}>Sign In</Text>
+							<Text style={styles.btnText}>Sign Up</Text>
 						</Button>
 					) : (
 						<Button disabled={true} style={styles.buttonLoading}>
@@ -92,12 +161,12 @@ const Login = ({ navigation }) => {
 					)}
 					<View style={styles.textBelow}>
 						<Text style={[styles.clear, { textDecorationLine: 'none' }]}>
-							Don't Have Account?
+							Already Have Account?
 						</Text>
 						<Text
 							style={[styles.clear, { color: colors.litBlue }]}
-							onPress={() => navigation.replace('Register')}>
-							Register
+							onPress={() => navigation.replace('Login')}>
+							Login
 						</Text>
 					</View>
 				</View>
@@ -106,7 +175,7 @@ const Login = ({ navigation }) => {
 	)
 }
 
-Login.navigationOptions = () => ({
+Register.navigationOptions = () => ({
 	header: null,
 })
 
@@ -114,15 +183,6 @@ const width = Dimensions.get('window').width
 const height = Dimensions.get('window').height
 
 const styles = StyleSheet.create({
-	textBelow: {
-		width: '100%',
-		height: 30,
-		flexDirection: 'column',
-		justifyContent: 'center',
-		alignContent: 'center',
-		alignItems: 'center',
-		marginTop: 20,
-	},
 	container: {
 		paddingVertical: 70,
 		paddingHorizontal: 30,
@@ -137,6 +197,15 @@ const styles = StyleSheet.create({
 		height: 20,
 		flexDirection: 'row-reverse',
 		marginTop: 10,
+	},
+	textBelow: {
+		width: '100%',
+		height: 30,
+		flexDirection: 'column',
+		justifyContent: 'center',
+		alignContent: 'center',
+		alignItems: 'center',
+		marginTop: 20,
 	},
 	clear: {
 		textDecorationLine: 'underline',
@@ -196,4 +265,4 @@ const styles = StyleSheet.create({
 		color: colors.grey,
 	},
 })
-export default Login
+export default Register

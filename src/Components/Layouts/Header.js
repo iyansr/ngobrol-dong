@@ -16,25 +16,19 @@ import PropTypes from 'prop-types'
 
 const CustomHeader = ({ leftPressed, showLeft, showRight, headerTitle }) => {
 	return (
-		<Header style={{ backgroundColor: colors.purple }}>
-			<StatusBar backgroundColor={colors.purple} />
+		<Header style={{ backgroundColor: colors.litBlue }}>
+			<StatusBar backgroundColor={colors.litBlue} />
 			{showLeft && (
-				<Left style={{ flex: 1 }}>
+				<Left>
 					<Button transparent onPress={leftPressed}>
 						<Icon type='FontAwesome5' name='chevron-left' />
 					</Button>
 				</Left>
 			)}
-
-			<Body
-				style={{
-					flex: 1,
-					alignContent: 'center',
-					alignItems: 'center',
-				}}>
+			<Body>
 				<Title style={styles.title}>{headerTitle}</Title>
 			</Body>
-			{showRight && <Right style={{ flex: 1 }} />}
+			{showRight && <Right />}
 		</Header>
 	)
 }
@@ -54,7 +48,7 @@ CustomHeader.propTypes = {
 const styles = StyleSheet.create({
 	title: {
 		fontFamily: PoppinsBold,
-		color: colors.whiteChoco,
+		color: colors.white,
 	},
 })
 

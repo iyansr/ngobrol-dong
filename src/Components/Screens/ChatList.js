@@ -25,7 +25,7 @@ import { colors } from '../../Theme/colors'
 const ChatList = ({ navigation }) => {
 	const ar = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 	return (
-		<View style={{ backgroundColor: colors.whiteChoco }}>
+		<View style={{ backgroundColor: colors.white }}>
 			<ScrollView
 				contentContainerStyle={{ marginVertical: 10 }}
 				showsHorizontalScrollIndicator={false}
