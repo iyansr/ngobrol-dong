@@ -10,7 +10,7 @@
     "lint": "eslint ."
   },
   "dependencies": {
-    "@react-native-community/async-storage": "^1.6.3",
+    "@react-native-community/async-storage": "^1.7.0",
     "expo-font": "^7.0.0",
     "firebase": "^7.5.2",
     "jetifier": "^1.6.5",
