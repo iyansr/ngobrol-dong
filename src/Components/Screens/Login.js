@@ -12,6 +12,8 @@ import {
 import { PoppinsBold, PoppinsRegular } from '../../Theme/fonts'
 import { colors } from '../../Theme/colors'
 import { Input, Form, Label, Item, Button } from 'native-base'
+import { Database, Auth } from '../../Configs/Firebase'
+import AsyncStorage from '@react-native-community/async-storage'
 
 const Login = ({ navigation }) => {
 	const [email, setEmail] = useState('')
@@ -19,7 +21,7 @@ const Login = ({ navigation }) => {
 	const [loading, setLoading] = useState(false)
 	const [error, setError] = useState(null)
 
-	const onSubmit = () => {
+	const onSubmit = async () => {
 		if (email === '' && password === '') {
 			setError({
 				email: 'Email Cannot Empty',
@@ -30,10 +32,36 @@ const Login = ({ navigation }) => {
 		} else if (password.length < 6) {
 			setError({ password: 'Password Should Greater Than 6' })
 		} else {
-			// ToastAndroid.show('Succes', ToastAndroid.SHORT)
-			// navigation.navigate('ChatList')
-			setLoading(true)
-			console.log(email)
+			try {
+				setLoading(true)
+				const response = await Auth.signInWithEmailAndPassword(email, password)
+				Database.ref(`/user/${response.user.uid}`).update({
+					status: 'Online',
+				})
+
+				Database.ref('user/')
+					.orderByChild('/email')
+					.equalTo(email)
+					.once('value', result => {
+						let data = result.val()
+						if (data !== null) {
+							let user = Object.values(data)
+
+							AsyncStorage.setItem('user.email', user[0].email)
+							AsyncStorage.setItem('user.name', user[0].name)
+							AsyncStorage.setItem('user.avatar', user[0].avatar)
+						}
+					})
+
+				AsyncStorage.setItem('userId', response.user.uid)
+				ToastAndroid.show('Welcome back!', ToastAndroid.LONG)
+				navigation.replace('ChatList')
+				setLoading(false)
+			} catch (error) {
+				setError(null)
+				ToastAndroid.show(error.message, ToastAndroid.LONG)
+				setLoading(false)
+			}
 		}
 	}
 

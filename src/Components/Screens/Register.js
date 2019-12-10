@@ -47,14 +47,17 @@ const Register = ({ navigation }) => {
 					email,
 					password
 				)
-				response.user.updateProfile({
+
+				Auth.currentUser.updateProfile({
 					displayName: name,
+					photoURL:
+						'https://res.cloudinary.com/iyansrcloud/image/upload/v1575295609/upload/genre-icon/comedy_io7bh2.png',
 				})
 
 				await Database.ref(`/user/${response.user.uid}`).set({
 					id: response.user.uid,
 					name,
-					status: 'Offline',
+					status: 'Online',
 					email,
 					avatar:
 						'https://res.cloudinary.com/iyansrcloud/image/upload/v1575295609/upload/genre-icon/comedy_io7bh2.png',
@@ -74,8 +77,6 @@ const Register = ({ navigation }) => {
 						}
 					})
 				AsyncStorage.setItem('userId', response.user.uid)
-				AsyncStorage.setItem('user', JSON.stringify(response.user))
-
 				ToastAndroid.show(
 					'Your account is successfully registered!',
 					ToastAndroid.LONG
