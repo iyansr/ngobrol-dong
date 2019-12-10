@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import {
 	View,
 	// Text,
@@ -22,7 +22,25 @@ import {
 } from 'native-base'
 import CustomHeader from '../Layouts/Header'
 import { colors } from '../../Theme/colors'
+import AsyncStorage from '@react-native-community/async-storage'
+import firebase from 'firebase'
+
 const ChatList = ({ navigation }) => {
+	const getKey = async () => {
+		try {
+			const keys = await AsyncStorage.getAllKeys()
+			const result = await AsyncStorage.multiGet(keys)
+
+			// return result.map(req => JSON.parse(req)).forEach(console.log)
+			console.log(result)
+		} catch (error) {
+			console.error(error)
+		}
+	}
+	useEffect(() => {
+		getKey()
+	}, [])
+
 	const ar = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 	return (
 		<View style={{ backgroundColor: colors.white }}>

@@ -7,6 +7,7 @@ import Login from '../Screens/Login'
 import ChatList from '../Screens/ChatList'
 import Chat from '../Screens/Chat'
 import Register from '../Screens/Register'
+import SplashScreen from '../Screens/SplashScreen'
 
 const AppNavigator = createStackNavigator(
 	{
@@ -20,6 +21,7 @@ const AppNavigator = createStackNavigator(
 
 const AuthNavigator = createStackNavigator(
 	{
+		SplashScreen,
 		Login,
 		Register,
 		ChatList: {
@@ -28,7 +30,7 @@ const AuthNavigator = createStackNavigator(
 	},
 	{
 		headerMode: 'none',
-		initialRouteName: 'Register',
+		initialRouteName: 'SplashScreen',
 		transitionConfig: () => fromRight(),
 	}
 )

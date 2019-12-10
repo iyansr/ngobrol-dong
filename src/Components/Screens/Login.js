@@ -146,7 +146,7 @@ const styles = StyleSheet.create({
 	},
 	button: {
 		height: 40,
-		width: 300,
+		width: '100%',
 		backgroundColor: colors.litBlue,
 		marginTop: 20,
 		alignContent: 'center',
@@ -157,7 +157,7 @@ const styles = StyleSheet.create({
 	},
 	buttonLoading: {
 		height: 40,
-		width: 300,
+		width: '100%',
 		backgroundColor: colors.grey,
 		marginTop: 20,
 		alignContent: 'center',

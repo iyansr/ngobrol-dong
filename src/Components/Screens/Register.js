@@ -13,6 +13,7 @@ import { PoppinsBold, PoppinsRegular } from '../../Theme/fonts'
 import { colors } from '../../Theme/colors'
 import { Input, Form, Label, Item, Button } from 'native-base'
 import { Auth, Database } from '../../Configs/Firebase'
+import AsyncStorage from '@react-native-community/async-storage'
 
 const Register = ({ navigation }) => {
 	const [email, setEmail] = useState('')
@@ -23,6 +24,7 @@ const Register = ({ navigation }) => {
 	const [error, setError] = useState(null)
 
 	const onSubmit = async () => {
+		const pattern = /^\w+@[a-zA-Z_]+?\.[a-zA-Z]{2,3}$/
 		if (email === '' && password === '' && password2 === '' && name === '') {
 			setError({
 				name: 'Name Cannot Empty',
@@ -30,6 +32,8 @@ const Register = ({ navigation }) => {
 				password: 'Password Cannot Empty',
 				password2: 'Password Cannot Empty',
 			})
+		} else if (!pattern.test(email)) {
+			setError({ email: 'Invald Email' })
 		} else if (password === '') {
 			setError({ password: 'Password Cannot Empty' })
 		} else if (password.length < 6) {
@@ -47,7 +51,7 @@ const Register = ({ navigation }) => {
 					displayName: name,
 				})
 
-				await Database.ref('/user/' + response.user.uid).set({
+				await Database.ref(`/user/${response.user.uid}`).set({
 					id: response.user.uid,
 					name,
 					status: 'Offline',
@@ -55,6 +59,23 @@ const Register = ({ navigation }) => {
 					avatar:
 						'https://res.cloudinary.com/iyansrcloud/image/upload/v1575295609/upload/genre-icon/comedy_io7bh2.png',
 				})
+
+				await Database.ref('user/')
+					.orderByChild('email/')
+					.equalTo(email)
+					.once('value', result => {
+						let data = result.val()
+						if (data !== null) {
+							let user = Object.values(data)
+
+							AsyncStorage.setItem('user.email', user[0].email)
+							AsyncStorage.setItem('user.name', user[0].name)
+							AsyncStorage.setItem('user.avatar', user[0].avatar)
+						}
+					})
+				AsyncStorage.setItem('userId', response.user.uid)
+				AsyncStorage.setItem('user', JSON.stringify(response.user))
+
 				ToastAndroid.show(
 					'Your account is successfully registered!',
 					ToastAndroid.LONG
@@ -63,19 +84,11 @@ const Register = ({ navigation }) => {
 				setLoading(false)
 			} catch (error) {
 				setError(null)
-				setEmail('')
-				setName('')
-				setPassword('')
-				setPassword2('')
-				ToastAndroid.show('Error', ToastAndroid.LONG)
+				ToastAndroid.show(error.message, ToastAndroid.LONG)
 				setLoading(false)
 
 				console.log(error)
 			}
-			// setError(null)
-			// ToastAndroid.show('Succes', ToastAndroid.SHORT)
-			// // navigation.replace('ChatList')
-			// console.log(email)
 		}
 	}
 
@@ -215,7 +228,7 @@ const styles = StyleSheet.create({
 	},
 	button: {
 		height: 40,
-		width: 300,
+		width: '100%',
 		backgroundColor: colors.litBlue,
 		marginTop: 20,
 		alignContent: 'center',
@@ -226,7 +239,7 @@ const styles = StyleSheet.create({
 	},
 	buttonLoading: {
 		height: 40,
-		width: 300,
+		width: '100%',
 		backgroundColor: colors.grey,
 		marginTop: 20,
 		alignContent: 'center',
