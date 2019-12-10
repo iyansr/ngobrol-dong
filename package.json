@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@react-native-community/async-storage": "^1.6.3",
+    "@react-native-mapbox-gl/maps": "^7.0.8",
     "expo-font": "^7.0.0",
     "firebase": "^7.5.2",
     "jetifier": "^1.6.5",
@@ -18,6 +19,7 @@
     "react": "16.9.0",
     "react-native": "0.61.5",
     "react-native-gesture-handler": "^1.5.2",
+    "react-native-gifted-chat": "^0.12.0",
     "react-native-reanimated": "^1.4.0",
     "react-native-screens": "^1.0.0-alpha.23",
     "react-navigation": "^4.0.10",

@@ -8,11 +8,13 @@ import ChatList from '../Screens/ChatList'
 import Chat from '../Screens/Chat'
 import Register from '../Screens/Register'
 import SplashScreen from '../Screens/SplashScreen'
+import MapView from '../Screens/MapView'
 
 const AppNavigator = createStackNavigator(
 	{
 		ChatList,
 		Chat,
+		MapView,
 	},
 	{
 		transitionConfig: () => fromRight(),

@@ -14,7 +14,13 @@ import { colors } from '../../Theme/colors'
 import { PoppinsBold } from '../../Theme/fonts'
 import PropTypes from 'prop-types'
 
-const CustomHeader = ({ leftPressed, showLeft, showRight, headerTitle }) => {
+const CustomHeader = ({
+	leftPressed,
+	showLeft,
+	showRight,
+	headerTitle,
+	rightItem,
+}) => {
 	return (
 		<Header style={{ backgroundColor: colors.litBlue }}>
 			<StatusBar backgroundColor={colors.litBlue} />
@@ -28,7 +34,7 @@ const CustomHeader = ({ leftPressed, showLeft, showRight, headerTitle }) => {
 			<Body>
 				<Title style={styles.title}>{headerTitle}</Title>
 			</Body>
-			{showRight && <Right />}
+			{showRight && <Right>{rightItem}</Right>}
 		</Header>
 	)
 }
