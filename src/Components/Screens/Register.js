@@ -14,6 +14,7 @@ import { colors } from '../../Theme/colors'
 import { Input, Form, Label, Item, Button } from 'native-base'
 import { Auth, Database } from '../../Configs/Firebase'
 import AsyncStorage from '@react-native-community/async-storage'
+import storage from '../../Configs/Storage'
 
 const Register = ({ navigation }) => {
 	const [email, setEmail] = useState('')
@@ -71,12 +72,29 @@ const Register = ({ navigation }) => {
 						if (data !== null) {
 							let user = Object.values(data)
 
-							AsyncStorage.setItem('user.email', user[0].email)
-							AsyncStorage.setItem('user.name', user[0].name)
-							AsyncStorage.setItem('user.avatar', user[0].avatar)
+							// AsyncStorage.setItem('user.email', user[0].email)
+							// AsyncStorage.setItem('user.name', user[0].name)
+							// AsyncStorage.setItem('user.avatar', user[0].avatar)
+							// AsyncStorage.setItem(
+							// 	'USER',
+							// 	JSON.stringify({
+							// 		id: response.user.uid,
+							// 		email: user[0].email,
+							// 		name: user[0].name,
+							// 		avatar: user[0].avatar,
+							// 	})
+							// )
+							storage.save({
+								key: 'USER',
+								data: {
+									id: response.user.uid,
+									email: user[0].email,
+									name: user[0].name,
+									avatar: user[0].avatar,
+								},
+							})
 						}
 					})
-				AsyncStorage.setItem('userId', response.user.uid)
 				ToastAndroid.show(
 					'Your account is successfully registered!',
 					ToastAndroid.LONG

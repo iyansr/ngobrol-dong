@@ -25,16 +25,22 @@ const CustomHeader = ({
 		<Header style={{ backgroundColor: colors.litBlue }}>
 			<StatusBar backgroundColor={colors.litBlue} />
 			{showLeft && (
-				<Left>
+				<Left style={{ flex: 1 }}>
 					<Button transparent onPress={leftPressed}>
 						<Icon type='FontAwesome5' name='chevron-left' />
 					</Button>
 				</Left>
 			)}
-			<Body>
+			<Body
+				style={{
+					alignContent: 'center',
+					alignItems: 'center',
+					justifyContent: 'center',
+					flex: 1,
+				}}>
 				<Title style={styles.title}>{headerTitle}</Title>
 			</Body>
-			{showRight && <Right>{rightItem}</Right>}
+			{showRight && <Right style={{ flex: 1 }}>{rightItem}</Right>}
 		</Header>
 	)
 }

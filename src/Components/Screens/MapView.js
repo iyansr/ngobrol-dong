@@ -5,6 +5,7 @@ import { Auth, Database } from '../../Configs/Firebase'
 import { colors } from '../../Theme/colors'
 import { PoppinsRegular } from '../../Theme/fonts'
 import { mapBoxAPiKey } from '../../Configs/MapBoxAPI'
+import CustomHeader from '../Layouts/Header'
 
 const MapView = () => {
 	MapboxGL.setAccessToken(mapBoxAPiKey)
@@ -24,59 +25,61 @@ const MapView = () => {
 		},
 	])
 
-	const [loading, setLoading] = useState(true)
+	const [loading, setLoading] = useState(false)
 
 	useEffect(() => {
 		MapboxGL.setTelemetryEnabled(false)
-		setLoading(false)
+		// setTimeout(() => setLoading(false), 2000)
 	}, [])
 
-	/* //[logitute, latitude] */
+	//[logitute, latitude]
 
 	if (loading) {
 		return (
-			<View>
-				<Text>Loading...</Text>
-			</View>
+			<>
+				<CustomHeader headerTitle='Map' />
+				<View>
+					<Text>Loading...</Text>
+				</View>
+			</>
 		)
 	}
 
 	return (
-		<View style={styles.page}>
-			<View style={styles.container}>
-				<MapboxGL.MapView
-					style={styles.map}
-					zoomLevel={12}
-					rotateEnabled={true}
-					centerCoordinate={[110.37, -7.75]}>
-					{locationList.map(location => (
-						<MapboxGL.PointAnnotation
-							onSelected={() => alert(location.name)}
-							key={location.id}
-							id={location.id}
-							coordinate={[location.longitude, location.latitude]}
-							title='Point anotation'>
-							<View style={styles.annotationContainer}>
-								<View style={styles.annotationFill} />
-								<Text
-									style={{
-										color: colors.darkBlue,
-										fontFamily: PoppinsRegular,
-										marginTop: -2,
-									}}>
-									{location.name}
-								</Text>
-							</View>
-						</MapboxGL.PointAnnotation>
-					))}
-				</MapboxGL.MapView>
+		<>
+			<CustomHeader headerTitle='Map' />
+			<View style={styles.page}>
+				<View style={styles.container}>
+					<MapboxGL.MapView style={styles.map} rotateEnabled={true}>
+						<MapboxGL.Camera
+							zoomLevel={16}
+							centerCoordinate={[110.37, -7.75]}
+						/>
+						{locationList.map(location => (
+							<MapboxGL.PointAnnotation
+								onSelected={() => alert(location.name)}
+								key={location.id}
+								id={location.id}
+								coordinate={[location.longitude, location.latitude]}
+								title='Point anotation'>
+								<View style={styles.annotationContainer}>
+									<View style={styles.annotationFill} />
+									<Text
+										style={{
+											color: colors.darkBlue,
+											fontFamily: PoppinsRegular,
+											marginTop: -2,
+										}}>
+										{location.name}
+									</Text>
+								</View>
+							</MapboxGL.PointAnnotation>
+						))}
+					</MapboxGL.MapView>
+				</View>
 			</View>
-		</View>
+		</>
 	)
-}
-
-MapView.navigationOptions = {
-	header: null,
 }
 
 const styles = StyleSheet.create({
@@ -106,7 +109,7 @@ const styles = StyleSheet.create({
 		width: 30,
 		height: 30,
 		borderRadius: 15,
-		backgroundColor: 'blue',
+		backgroundColor: colors.litBlue,
 		transform: [{ scale: 0.6 }],
 	},
 })
