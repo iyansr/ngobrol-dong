@@ -16,36 +16,6 @@ import AsyncStorage from '@react-native-community/async-storage'
 import storage from '../../Configs/Storage'
 
 class ChatListItem extends Component {
-	// state = {
-	// 	userList: [],
-	// 	refreshing: true,
-	// 	userId: null,
-	// }
-
-	// componentDidMount = async () => {
-	// 	try {
-	// 		const data = await AsyncStorage.getItem('@user')
-	// 		console.log('USER IN CHATLIST ITEM', data)
-	// 		const usr = JSON.parse(data)
-	// 		this.setState({
-	// 			userId: usr.id,
-	// 		})
-	// 		Database.ref('/user').on('child_added', value => {
-	// 			let person = value.val()
-	// 			if (person.id !== this.state.userId) {
-	// 				this.setState(prev => ({
-	// 					userList: [...prev.userList, person],
-	// 					refreshing: false,
-	// 				}))
-	// 			}
-	// 		})
-	// 	} catch (error) {
-	// 		ToastAndroid.show(error.message, ToastAndroid.LONG)
-	// 		console.log(error)
-	// 	}
-	// }
-
-	// console.log(userId)
 	render() {
 		return this.props.refreshing ? (
 			<ActivityIndicator
@@ -56,6 +26,7 @@ class ChatListItem extends Component {
 		) : (
 			this.props.userList.length > 0 && (
 				<FlatList
+					refreshControl={this.props.refreshControl}
 					keyExtractor={(_, index) => `${index}`}
 					data={this.props.userList}
 					renderItem={({ item }) => (

@@ -37,23 +37,43 @@ class Register extends Component {
 		const { email, name, password, password2, loading, error } = this.state
 		const pattern = /^\w+@[a-zA-Z_]+?\.[a-zA-Z]{2,3}$/
 		if (email === '' && password === '' && password2 === '' && name === '') {
-			setError({
-				name: 'Name Cannot Empty',
-				email: 'Email Cannot Empty',
-				password: 'Password Cannot Empty',
-				password2: 'Password Cannot Empty',
+			this.setState({
+				error: {
+					name: 'Name Cannot Empty',
+					email: 'Email Cannot Empty',
+					password: 'Password Cannot Empty',
+					password2: 'Password Cannot Empty',
+				},
 			})
 		} else if (!pattern.test(email)) {
-			setError({ email: 'Invald Email' })
+			this.setState({
+				error: {
+					name: 'Invalid Email Format',
+				},
+			})
 		} else if (password === '') {
-			setError({ password: 'Password Cannot Empty' })
+			this.setState({
+				error: {
+					password: 'Password Cannot Empty',
+				},
+			})
 		} else if (password.length < 6) {
-			setError({ password: 'Password Should Greater Than 6' })
+			this.setState({
+				error: {
+					password: 'Password should be atleast 6 characters',
+				},
+			})
 		} else if (password2 !== password) {
-			setError({ password2: 'Password Not Match' })
+			this.setState({
+				error: {
+					password2: 'Password must match',
+				},
+			})
 		} else {
 			try {
-				setLoading(true)
+				this.setState({
+					loading: true,
+				})
 				const response = await Auth.createUserWithEmailAndPassword(
 					email,
 					password
@@ -81,10 +101,6 @@ class Register extends Component {
 						let data = result.val()
 						if (data !== null) {
 							let user = Object.values(data)
-
-							// AsyncStorage.setItem('user.email', user[0].email)
-							// AsyncStorage.setItem('user.name', user[0].name)
-							// AsyncStorage.setItem('user.avatar', user[0].avatar)
 							await AsyncStorage.setItem(
 								'@user',
 								JSON.stringify({
@@ -100,24 +116,32 @@ class Register extends Component {
 					'Your account is successfully registered!',
 					ToastAndroid.LONG
 				)
-				navigation.replace('ChatList')
-				setLoading(false)
+				Auth.signInWithEmailAndPassword(email, password)
+				this.props.navigation.replace('ChatList')
+				this.setState({
+					loading: false,
+					error: null,
+				})
 			} catch (error) {
-				setError(null)
 				ToastAndroid.show(error.message, ToastAndroid.LONG)
-				setLoading(false)
-
+				this.setState({
+					loading: false,
+					error: null,
+				})
 				console.log(error)
 			}
 		}
 	}
 
 	onClear = () => {
-		setError(null)
-		setEmail('')
-		setName('')
-		setPassword('')
-		setPassword2('')
+		this.setState({
+			email: '',
+			name: '',
+			password: '',
+			password2: '',
+			loading: false,
+			error: null,
+		})
 	}
 
 	static navigationOptions = () => ({
@@ -141,7 +165,7 @@ class Register extends Component {
 									style={styles.input}
 									value={name}
 									keyboardType='email-address'
-									onChangeText={val => setName(val)}
+									onChangeText={val => this.setState({ name: val })}
 								/>
 							</Item>
 							{error && <Text style={styles.errorMsg}>{error.name}</Text>}

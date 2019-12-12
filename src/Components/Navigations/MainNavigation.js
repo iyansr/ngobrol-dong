@@ -13,11 +13,24 @@ import MapView from '../Screens/MapView'
 import Profile from '../Screens/Profile'
 import { Icon } from 'native-base'
 import { colors } from '../../Theme/colors'
+import FriendsProfile from '../Screens/FriendsProfile'
 
 const AppNavigator = createStackNavigator(
 	{
 		ChatList,
 		Chat,
+		FriendsProfile,
+	},
+	{
+		headerMode: 'none',
+		transitionConfig: () => fromRight(),
+	}
+)
+
+const MapNavigation = createStackNavigator(
+	{
+		MapView,
+		FriendsProfile,
 	},
 	{
 		headerMode: 'none',
@@ -41,7 +54,7 @@ const MainNavigation = createBottomTabNavigator(
 			},
 		},
 		MapView: {
-			screen: MapView,
+			screen: MapNavigation,
 			navigationOptions: {
 				tabBarLabel: 'Map',
 				tabBarIcon: ({ tintColor }) => (

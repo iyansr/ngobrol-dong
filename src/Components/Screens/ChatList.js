@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { View, Dimensions, ToastAndroid } from 'react-native'
+import { View, Dimensions, ToastAndroid, RefreshControl } from 'react-native'
 
 import CustomHeader from '../Layouts/Header'
 import { colors } from '../../Theme/colors'
@@ -13,14 +13,14 @@ class ChatList extends Component {
 		name: '',
 		userList: [],
 		refreshing: true,
+		refresh: false,
 		userId: null,
 	}
 
-	componentDidMount = async () => {
+	getUser = async () => {
 		try {
 			const data = await AsyncStorage.getItem('@user')
 			const usr = JSON.parse(data)
-			console.log('USER IN CHAT LIST', data)
 			this.setState({
 				name: usr.name,
 				userId: usr.id,
@@ -28,16 +28,22 @@ class ChatList extends Component {
 			Database.ref('/user').on('child_added', value => {
 				let person = value.val()
 				if (person.id !== this.state.userId) {
-					this.setState(prev => ({
-						userList: [...prev.userList, person],
-						refreshing: false,
-					}))
+					this.setState(prev => {
+						return {
+							userList: [...prev.userList, person],
+							refreshing: false,
+						}
+					})
 				}
 			})
 		} catch (error) {
 			ToastAndroid.show(error.message, ToastAndroid.LONG)
 			console.log(error.message)
 		}
+	}
+
+	componentDidMount = async () => {
+		await this.getUser()
 	}
 
 	render() {
@@ -50,6 +56,21 @@ class ChatList extends Component {
 						height: Dimensions.get('window').height,
 					}}>
 					<ChatListItem
+						refreshControl={
+							<RefreshControl
+								onRefresh={async () => {
+									if (this.state.userList.length > 0) {
+										this.setState({
+											userList: [],
+										})
+									}
+									this.setState({ refresh: true })
+									await this.getUser()
+									this.setState({ refresh: false })
+								}}
+								refreshing={this.state.refresh}
+							/>
+						}
 						userList={this.state.userList}
 						refreshing={this.state.refreshing}
 						changePage={item =>

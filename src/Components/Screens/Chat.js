@@ -6,6 +6,7 @@ import {
 	ScrollView,
 	Dimensions,
 	ToastAndroid,
+	TouchableOpacity,
 	Image,
 } from 'react-native'
 import CustomHeader from '../Layouts/Header'
@@ -16,6 +17,7 @@ import { colors } from '../../Theme/colors'
 import { Icon } from 'native-base'
 import firebase from 'firebase'
 import storage from '../../Configs/Storage'
+import { PoppinsRegular } from '../../Theme/fonts'
 
 class Chat extends Component {
 	state = {
@@ -36,14 +38,12 @@ class Chat extends Component {
 				.child(this.state.user.id)
 				.child(this.state.chatTo.id)
 				.on('child_added', value => {
-					// setMessageList(prev => GiftedChat.append(prev, value.val()))
 					this.setState(prev => ({
 						messageList: GiftedChat.append(prev.messageList, value.val()),
 					}))
 				})
 		} catch (error) {
 			ToastAndroid.show(error.message, ToastAndroid.LONG)
-			// console.log(err)
 		}
 	}
 
@@ -51,9 +51,17 @@ class Chat extends Component {
 		return (
 			<Bubble
 				{...props}
+				textStyle={{
+					right: {
+						fontFamily: PoppinsRegular,
+					},
+					left: {
+						fontFamily: PoppinsRegular,
+					},
+				}}
 				wrapperStyle={{
 					right: {
-						backgroundColor: colors.litBlue,
+						backgroundColor: colors.darkBlue,
 						borderTopLeftRadius: 7,
 						borderTopRightRadius: 7,
 						borderBottomRightRadius: 7,
@@ -109,33 +117,44 @@ class Chat extends Component {
 					style={{
 						width: 54,
 						height: 44,
-						borderTopLeftRadius: 25,
-						borderBottomLeftRadius: 25,
+						// borderTopLeftRadius: 25,
+						// borderBottomLeftRadius: 25,
 						marginBottom: 0,
-						marginHorizontal: 5,
-						backgroundColor: '#694be2',
+						// marginHorizontal: 5,
+						backgroundColor: colors.litBlue,
 						justifyContent: 'center',
 						alignItems: 'center',
 					}}>
-					<Icon name={'ios-send'} size={28} color={'white'} />
+					<Icon
+						type='FontAwesome5'
+						name='fighter-jet'
+						style={{ color: colors.white }}
+					/>
 				</View>
 			</Send>
 		)
 	}
 	render() {
-		console.log('CHAT TO', this.state.chatTo)
-
 		return (
 			<>
 				<CustomHeader
 					headerTitle={this.state.chatTo.name}
 					showLeft={true}
 					showRight={true}
+					showSubtitle={true}
+					subtitle={this.state.chatTo.status}
 					rightItem={
-						<Image
-							style={{ height: 40, width: 40, borderRadius: 20 }}
-							source={{ uri: this.state.chatTo.avatar }}
-						/>
+						<TouchableOpacity
+							onPress={() =>
+								this.props.navigation.navigate('FriendsProfile', {
+									user: this.state.chatTo,
+								})
+							}>
+							<Image
+								style={{ height: 40, width: 40, borderRadius: 20 }}
+								source={{ uri: this.state.chatTo.avatar }}
+							/>
+						</TouchableOpacity>
 					}
 					leftPressed={() => this.props.navigation.goBack()}
 				/>

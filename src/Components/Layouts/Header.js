@@ -8,10 +8,11 @@ import {
 	Button,
 	Icon,
 	Title,
+	Subtitle,
 } from 'native-base'
 import { StatusBar, StyleSheet } from 'react-native'
 import { colors } from '../../Theme/colors'
-import { PoppinsBold } from '../../Theme/fonts'
+import { PoppinsBold, PoppinsRegular } from '../../Theme/fonts'
 import PropTypes from 'prop-types'
 
 const CustomHeader = ({
@@ -20,6 +21,8 @@ const CustomHeader = ({
 	showRight,
 	headerTitle,
 	rightItem,
+	showSubtitle,
+	subtitle,
 }) => {
 	return (
 		<Header style={{ backgroundColor: colors.litBlue }}>
@@ -39,6 +42,11 @@ const CustomHeader = ({
 					flex: 1,
 				}}>
 				<Title style={styles.title}>{headerTitle}</Title>
+				{showSubtitle && (
+					<Subtitle style={{ fontFamily: PoppinsRegular, fontSize: 12 }}>
+						{subtitle}
+					</Subtitle>
+				)}
 			</Body>
 			{showRight && <Right style={{ flex: 1 }}>{rightItem}</Right>}
 		</Header>

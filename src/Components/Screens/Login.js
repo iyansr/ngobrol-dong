@@ -33,14 +33,24 @@ class Login extends Component {
 		const { email, password, loading, error } = this.state
 
 		if (email === '' && password === '') {
-			setError({
-				email: 'Email Cannot Empty',
-				password: 'Password Cannot Empty',
+			this.setState({
+				error: {
+					email: 'Email Cannot Empty',
+					password: 'Password Cannot Empty',
+				},
 			})
 		} else if (password === '') {
-			setError({ password: 'Password Cannot Empty' })
+			this.setState({
+				error: {
+					password: 'Password Cannot Empty',
+				},
+			})
 		} else if (password.length < 6) {
-			setError({ password: 'Password Should Greater Than 6' })
+			this.setState({
+				error: {
+					password: 'Password Should Greater Than 6',
+				},
+			})
 		} else {
 			try {
 				this.setState({ loading: true })
