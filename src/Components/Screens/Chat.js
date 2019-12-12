@@ -17,90 +17,37 @@ import { Icon } from 'native-base'
 import firebase from 'firebase'
 import storage from '../../Configs/Storage'
 
-// class Chat extends Component {
-const Chat = ({ navigation }) => {
-	// state = {
-	// 	chatTo: this.props.navigation.getParam('item'),
-	// 	user: {},
-	// 	messageList: [],
-	// 	message: '',
-	// }
-	const chatTo = navigation.getParam('item')
-	const [user, setUser] = useState({})
-	const [messageList, setMessageList] = useState([])
-	const [message, setmessage] = useState('')
-
-	const getUser = () => {
-		storage
-			.load({
-				key: 'USER',
-				autoSync: true,
-				syncInBackground: true,
-			})
-			.then(data => {
-				console.log(data)
-				setUser(data)
-				Database.ref('/messages')
-					.child(data.id)
-					.child(chatTo.id)
-					.on('child_added', value => {
-						setMessageList(prev => GiftedChat.append(prev, value.val()))
-					})
-			})
-			.catch(err => {
-				ToastAndroid.show(err.message, ToastAndroid.LONG)
-				console.log(err.message)
-			})
-		// 	AsyncStorage.getItem('USER')
-		// 		.then(u => {
-		// 			const thisUser = JSON.parse(u)
-		// 			setUser(thisUser)
-		// 			Database.ref('/messages')
-		// 				.child(thisUser.id)
-		// 				.child(chatTo.id)
-		// 				.on('child_added', value => {
-		// 					setMessageList(prev => GiftedChat.append(prev, value.val()))
-		// 				})
-		// 		})
-		// 		.catch(error => {
-		// 			ToastAndroid.show(error.message, ToastAndroid.LONG)
-		// 		})
-		// }
-		// 		.child(thisUser.id)
-		// 		.child(chatTo.id)
-		// 		.on('child_added', value => {
-		// 			setMessageList(prev => GiftedChat.append(prev, value.val()))
-		// 		})
-		// 	const thisUser = JSON.parse(data)
-		// 	setUser(thisUser)
-		// 	Database.ref('/messages')
-		// 		.child(thisUser.id)
-		// 		.child(chatTo.id)
-		// 		.on('child_added', value => {
-		// 			setMessageList(prev => GiftedChat.append(prev, value.val()))
-		// 		})
-		// } catch (error) {
-		// 	ToastAndroid.show(error.message, ToastAndroid.LONG)
+class Chat extends Component {
+	state = {
+		chatTo: this.props.navigation.getParam('item'),
+		user: {},
+		messageList: [],
+		message: '',
 	}
 
-	useEffect(() => {
-		// AsyncStorage.getItem('USER')
-		// 	.then(u => {
-		// 		const USER = JSON.parse(u)
-		// 		setUser(USER)
-		// 		Database.ref('/messages')
-		// 			.child(USER.id)
-		// 			.child(chatTo.id)
-		// 			.on('child_added', value => {
-		// 				setMessageList(prev => GiftedChat.append(prev, value.val()))
-		// 			})
-		// 	})
-		// 	.catch(e => ToastAndroid.show(e.message, ToastAndroid.LONG))
-		// getUser()
-		getUser()
-	}, [])
+	componentDidMount = async () => {
+		try {
+			const data = await AsyncStorage.getItem('@user')
+			const usr = JSON.parse(data)
+			this.setState({
+				user: usr,
+			})
+			Database.ref('/messages')
+				.child(this.state.user.id)
+				.child(this.state.chatTo.id)
+				.on('child_added', value => {
+					// setMessageList(prev => GiftedChat.append(prev, value.val()))
+					this.setState(prev => ({
+						messageList: GiftedChat.append(prev.messageList, value.val()),
+					}))
+				})
+		} catch (error) {
+			ToastAndroid.show(error.message, ToastAndroid.LONG)
+			// console.log(err)
+		}
+	}
 
-	const renderBuble = props => {
+	renderBuble = props => {
 		return (
 			<Bubble
 				{...props}
@@ -123,47 +70,39 @@ const Chat = ({ navigation }) => {
 		)
 	}
 
-	const onsendMsg = () => {
-		// AsyncStorage.getItem('USER')
-		// 	.then(u => {
-		// 		const USER = JSON.parse(u)
-		// 		setUser(USER)
-		// 		// Database.ref('/messages')
-		// 		// 	.child(USER.id)
-		// 		// 	.child(chatTo.id)
-		// 		// 	.on('child_added', value => {
-		// 		// 		setMessageList(prev => GiftedChat.append(prev, value.val()))
-		// 		// 	})
-		if (message.length > 0) {
+	onsendMsg = () => {
+		if (this.state.message.length > 0) {
 			let msgId = Database.ref('/messages')
-				.child(user.id)
-				.child(chatTo.id)
+				.child(this.state.user.id)
+				.child(this.state.chatTo.id)
 				.push().key
 
 			let updates = {}
 			let Message = {
 				_id: msgId,
-				text: message,
+				text: this.state.message,
 				createdAt: firebase.database.ServerValue.TIMESTAMP,
 				user: {
-					_id: user.id,
-					name: user.name,
-					avatar: user.avatar,
+					_id: this.state.user.id,
+					name: this.state.user.name,
+					avatar: this.state.user.avatar,
 				},
 			}
+
+			const { user, chatTo } = this.state
 
 			updates[`/messages/${user.id}/${chatTo.id}/${msgId}`] = Message
 			updates[`/messages/${chatTo.id}/${user.id}/${msgId}`] = Message
 
 			Database.ref().update(updates)
-			// this.setState({ message: '' })
-			setmessage('')
+
+			this.setState({
+				message: '',
+			})
 		}
-		// })
-		// .catch(e => ToastAndroid.show(e.message, ToastAndroid.LONG))
 	}
 
-	const renderSend = props => {
+	renderSend = props => {
 		return (
 			<Send {...props}>
 				<View
@@ -183,50 +122,36 @@ const Chat = ({ navigation }) => {
 			</Send>
 		)
 	}
+	render() {
+		console.log('CHAT TO', this.state.chatTo)
 
-	// render() {
-	// console.log(messageList)
-	// const userName = this.props.navigation.getParam('item')
-	// console.log(userName)
-	return (
-		<>
-			<CustomHeader
-				headerTitle={chatTo.name}
-				showLeft={true}
-				showRight={true}
-				rightItem={
-					<Image
-						style={{ height: 40, width: 40, borderRadius: 20 }}
-						source={{ uri: chatTo.avatar }}
-					/>
-				}
-				leftPressed={() => navigation.goBack()}
-			/>
-			{/* <View>
-					<Text>ChatRoom</Text>
-				</View> */}
-			<GiftedChat
-				renderBubble={renderBuble}
-				renderSend={renderSend}
-				text={message}
-				onInputTextChanged={val => setmessage(val)}
-				messages={messageList}
-				onSend={onsendMsg}
-				user={{
-					_id: user.id,
-				}}
-			/>
-		</>
-	)
+		return (
+			<>
+				<CustomHeader
+					headerTitle={this.state.chatTo.name}
+					showLeft={true}
+					showRight={true}
+					rightItem={
+						<Image
+							style={{ height: 40, width: 40, borderRadius: 20 }}
+							source={{ uri: this.state.chatTo.avatar }}
+						/>
+					}
+					leftPressed={() => this.props.navigation.goBack()}
+				/>
+				<GiftedChat
+					renderBubble={this.renderBuble}
+					renderSend={this.renderSend}
+					text={this.state.message}
+					onInputTextChanged={val => this.setState({ message: val })}
+					messages={this.state.messageList}
+					onSend={this.onsendMsg}
+					user={{
+						_id: this.state.user.id,
+					}}
+				/>
+			</>
+		)
+	}
 }
-
-// static navigationOptions = ({ navigation }) => {
-// 	const userName = navigation.getParam('item')
-// 	console.log(userName)
-// 	return {
-// 		header: null,
-// }
-// }
-// }
-
 export default Chat

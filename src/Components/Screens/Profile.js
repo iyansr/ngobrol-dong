@@ -8,11 +8,12 @@ const Profile = ({ navigation }) => {
 		<View>
 			<Text
 				onPress={async () => {
-					await AsyncStorage.clear()
-					storage.remove({ key: 'USER' }).then(() => {
+					try {
+						await AsyncStorage.clear()
 						navigation.replace('Login')
-					})
-					// navigation.replace('Login')
+					} catch (error) {
+						console.log(error)
+					}
 				}}>
 				LOG OUT
 			</Text>

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { Component } from 'react'
 import { StyleSheet, View, Dimensions, Text } from 'react-native'
 import MapboxGL from '@react-native-mapbox-gl/maps'
 import { Auth, Database } from '../../Configs/Firebase'
@@ -7,79 +7,99 @@ import { PoppinsRegular } from '../../Theme/fonts'
 import { mapBoxAPiKey } from '../../Configs/MapBoxAPI'
 import CustomHeader from '../Layouts/Header'
 
-const MapView = () => {
-	MapboxGL.setAccessToken(mapBoxAPiKey)
+MapboxGL.setAccessToken(mapBoxAPiKey)
+class MapView extends Component {
+	state = {
+		locationList: [
+			{
+				id: 'ugmMap',
+				name: 'Iyan',
+				longitude: 110.3772568,
+				latitude: -7.7728579,
+			},
+			{
+				id: 'meHere',
+				name: 'Kenzo',
+				longitude: 110.37,
+				latitude: -7.75,
+			},
+		],
+		loading: false,
+	}
 
-	const [locationList, setLocationList] = useState([
-		{
-			id: 'ugmMap',
-			name: 'Iyan',
-			longitude: 110.3772568,
-			latitude: -7.7728579,
-		},
-		{
-			id: 'meHere',
-			name: 'Kenzo',
-			longitude: 110.37,
-			latitude: -7.75,
-		},
-	])
+	// const [locationList, setLocationList] = useState([
+	// 	{
+	// 		id: 'ugmMap',
+	// 		name: 'Iyan',
+	// 		longitude: 110.3772568,
+	// 		latitude: -7.7728579,
+	// 	},
+	// 	{
+	// 		id: 'meHere',
+	// 		name: 'Kenzo',
+	// 		longitude: 110.37,
+	// 		latitude: -7.75,
+	// 	},
+	// ])
 
-	const [loading, setLoading] = useState(false)
-
-	useEffect(() => {
-		MapboxGL.setTelemetryEnabled(false)
-		// setTimeout(() => setLoading(false), 2000)
-	}, [])
+	// useEffect(() => {
+	// 	MapboxGL.setTelemetryEnabled(false)
+	// 	// setTimeout(() => setLoading(false), 2000)
+	// }, [])
 
 	//[logitute, latitude]
+	componentDidMount() {
+		MapboxGL.setTelemetryEnabled(false)
+	}
 
-	if (loading) {
+	render() {
+		const { locationList, loading } = this.state
+		if (loading) {
+			return (
+				<>
+					<CustomHeader headerTitle='Map' />
+					<View>
+						<Text>Loading...</Text>
+					</View>
+				</>
+			)
+		}
 		return (
 			<>
 				<CustomHeader headerTitle='Map' />
-				<View>
-					<Text>Loading...</Text>
+				<View style={styles.page}>
+					<View style={styles.container}>
+						<MapboxGL.MapView style={styles.map} rotateEnabled={true}>
+							<MapboxGL.Camera
+								zoomLevel={16}
+								centerCoordinate={[110.37, -7.75]}
+							/>
+							{locationList.map(location => (
+								<MapboxGL.PointAnnotation
+									onSelected={() => alert(location.name)}
+									key={location.id}
+									id={location.id}
+									coordinate={[location.longitude, location.latitude]}
+									title='Point anotation'>
+									<View style={styles.annotationContainer}>
+										<View style={styles.annotationFill} />
+										<Text
+											style={{
+												color: colors.darkBlue,
+												fontFamily: PoppinsRegular,
+												marginTop: -2,
+											}}>
+											{location.name}
+										</Text>
+									</View>
+								</MapboxGL.PointAnnotation>
+							))}
+						</MapboxGL.MapView>
+					</View>
 				</View>
 			</>
 		)
 	}
-
-	return (
-		<>
-			<CustomHeader headerTitle='Map' />
-			<View style={styles.page}>
-				<View style={styles.container}>
-					<MapboxGL.MapView style={styles.map} rotateEnabled={true}>
-						<MapboxGL.Camera
-							zoomLevel={16}
-							centerCoordinate={[110.37, -7.75]}
-						/>
-						{locationList.map(location => (
-							<MapboxGL.PointAnnotation
-								onSelected={() => alert(location.name)}
-								key={location.id}
-								id={location.id}
-								coordinate={[location.longitude, location.latitude]}
-								title='Point anotation'>
-								<View style={styles.annotationContainer}>
-									<View style={styles.annotationFill} />
-									<Text
-										style={{
-											color: colors.darkBlue,
-											fontFamily: PoppinsRegular,
-											marginTop: -2,
-										}}>
-										{location.name}
-									</Text>
-								</View>
-							</MapboxGL.PointAnnotation>
-						))}
-					</MapboxGL.MapView>
-				</View>
-			</View>
-		</>
-	)
 }
 
 const styles = StyleSheet.create({

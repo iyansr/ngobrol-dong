@@ -15,106 +15,84 @@ import { colors } from '../../Theme/colors'
 import AsyncStorage from '@react-native-community/async-storage'
 import storage from '../../Configs/Storage'
 
-const ChatListItem = ({ changePage }) => {
-	const [userList, setUserList] = useState([])
-	const [refreshing, setRefreshing] = useState(false)
-	const [userId, setUserId] = useState(null)
+class ChatListItem extends Component {
+	// state = {
+	// 	userList: [],
+	// 	refreshing: true,
+	// 	userId: null,
+	// }
 
-	const getUserId = () => {
-		setRefreshing(true)
-		AsyncStorage.getItem('USER')
-			.then(u => {
-				const USER = JSON.parse(u)
-				setUserId(USER.id)
-				Database.ref('/user').on('child_added', data => {
-					let person = data.val()
-					if (person.id !== USER.id) {
-						setUserList(prev => [...prev, person])
-						setRefreshing(false)
-					}
-				})
-			})
-			.catch(e => {
-				ToastAndroid.show(e.message, ToastAndroid.LONG)
-				setRefreshing(false)
-			})
-		setUserId([])
-	}
-
-	useEffect(() => {
-		// if (!userId) {
-		// 	getUserId()
-		// }
-		storage
-			.load({
-				key: 'USER',
-				autoSync: true,
-				syncInBackground: true,
-			})
-			.then(data => {
-				console.log(data)
-				setUserId(data.id)
-				Database.ref('/user').on('child_added', value => {
-					let person = value.val()
-					if (person.id !== data.id) {
-						setUserList(prev => [...prev, person])
-						setRefreshing(false)
-					}
-				})
-			})
-			.catch(err => {
-				ToastAndroid.show(err.message, ToastAndroid.LONG)
-				console.log(err)
-			})
-		return setUserList([])
-	}, [])
+	// componentDidMount = async () => {
+	// 	try {
+	// 		const data = await AsyncStorage.getItem('@user')
+	// 		console.log('USER IN CHATLIST ITEM', data)
+	// 		const usr = JSON.parse(data)
+	// 		this.setState({
+	// 			userId: usr.id,
+	// 		})
+	// 		Database.ref('/user').on('child_added', value => {
+	// 			let person = value.val()
+	// 			if (person.id !== this.state.userId) {
+	// 				this.setState(prev => ({
+	// 					userList: [...prev.userList, person],
+	// 					refreshing: false,
+	// 				}))
+	// 			}
+	// 		})
+	// 	} catch (error) {
+	// 		ToastAndroid.show(error.message, ToastAndroid.LONG)
+	// 		console.log(error)
+	// 	}
+	// }
 
 	// console.log(userId)
-	return refreshing ? (
-		<ActivityIndicator
-			size='large'
-			color='#05A0E4'
-			style={{ marginTop: 150 }}
-		/>
-	) : (
-		userList.length > 0 && (
-			<FlatList
-				keyExtractor={(_, index) => `${index}`}
-				data={userList}
-				renderItem={({ item }) => (
-					<View>
-						<TouchableOpacity onPress={() => changePage(item)}>
-							<View style={styles.row}>
-								<Image source={{ uri: item.avatar }} style={styles.pic} />
-								<View>
-									<View style={styles.nameContainer}>
-										<Text
-											style={styles.nameTxt}
-											numberOfLines={1}
-											ellipsizeMode='tail'>
-											{item.name}
-										</Text>
-										{item.status == 'Online' ? (
-											<View style={{ flexDirection: 'row', paddingTop: 10 }}>
-												<Text style={styles.on}>{item.status}</Text>
-											</View>
-										) : (
-											<View style={{ flexDirection: 'row', paddingTop: 10 }}>
-												<Text style={styles.off}>{item.status}</Text>
-											</View>
-										)}
-									</View>
-									<View style={styles.msgContainer}>
-										<Text style={styles.status}>{item.email}</Text>
+	render() {
+		return this.props.refreshing ? (
+			<ActivityIndicator
+				size='large'
+				color='#05A0E4'
+				style={{ marginTop: 150 }}
+			/>
+		) : (
+			this.props.userList.length > 0 && (
+				<FlatList
+					keyExtractor={(_, index) => `${index}`}
+					data={this.props.userList}
+					renderItem={({ item }) => (
+						<View>
+							<TouchableOpacity onPress={() => this.props.changePage(item)}>
+								<View style={styles.row}>
+									<Image source={{ uri: item.avatar }} style={styles.pic} />
+									<View>
+										<View style={styles.nameContainer}>
+											<Text
+												style={styles.nameTxt}
+												numberOfLines={1}
+												ellipsizeMode='tail'>
+												{item.name}
+											</Text>
+											{item.status == 'Online' ? (
+												<View style={{ flexDirection: 'row', paddingTop: 10 }}>
+													<Text style={styles.on}>{item.status}</Text>
+												</View>
+											) : (
+												<View style={{ flexDirection: 'row', paddingTop: 10 }}>
+													<Text style={styles.off}>{item.status}</Text>
+												</View>
+											)}
+										</View>
+										<View style={styles.msgContainer}>
+											<Text style={styles.status}>{item.email}</Text>
+										</View>
 									</View>
 								</View>
-							</View>
-						</TouchableOpacity>
-					</View>
-				)}
-			/>
+							</TouchableOpacity>
+						</View>
+					)}
+				/>
+			)
 		)
-	)
+	}
 }
 
 const styles = StyleSheet.create({

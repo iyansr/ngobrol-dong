@@ -1,5 +1,7 @@
 import Storage from 'react-native-storage'
-import AsyncStorage from '@react-native-community/async-storage'
+import AsyncStorage, {
+	useAsyncStorage,
+} from '@react-native-community/async-storage'
 
 const storage = new Storage({
 	size: 50000,

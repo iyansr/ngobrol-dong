@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { Component } from 'react'
 import {
 	View,
 	Text,
@@ -16,15 +16,25 @@ import { Auth, Database } from '../../Configs/Firebase'
 import AsyncStorage from '@react-native-community/async-storage'
 import storage from '../../Configs/Storage'
 
-const Register = ({ navigation }) => {
-	const [email, setEmail] = useState('')
-	const [name, setName] = useState('')
-	const [password, setPassword] = useState('')
-	const [password2, setPassword2] = useState('')
-	const [loading, setLoading] = useState(false)
-	const [error, setError] = useState(null)
+class Register extends Component {
+	// const [email, setEmail] = useState('')
+	// const [name, setName] = useState('')
+	// const [password, setPassword] = useState('')
+	// const [password2, setPassword2] = useState('')
+	// const [loading, setLoading] = useState(false)
+	// const [error, setError] = useState(null)
 
-	const onSubmit = async () => {
+	state = {
+		email: '',
+		name: '',
+		password: '',
+		password2: '',
+		loading: false,
+		error: null,
+	}
+
+	onSubmit = async () => {
+		const { email, name, password, password2, loading, error } = this.state
 		const pattern = /^\w+@[a-zA-Z_]+?\.[a-zA-Z]{2,3}$/
 		if (email === '' && password === '' && password2 === '' && name === '') {
 			setError({
@@ -67,7 +77,7 @@ const Register = ({ navigation }) => {
 				await Database.ref('user/')
 					.orderByChild('email/')
 					.equalTo(email)
-					.once('value', result => {
+					.once('value', async result => {
 						let data = result.val()
 						if (data !== null) {
 							let user = Object.values(data)
@@ -75,24 +85,15 @@ const Register = ({ navigation }) => {
 							// AsyncStorage.setItem('user.email', user[0].email)
 							// AsyncStorage.setItem('user.name', user[0].name)
 							// AsyncStorage.setItem('user.avatar', user[0].avatar)
-							// AsyncStorage.setItem(
-							// 	'USER',
-							// 	JSON.stringify({
-							// 		id: response.user.uid,
-							// 		email: user[0].email,
-							// 		name: user[0].name,
-							// 		avatar: user[0].avatar,
-							// 	})
-							// )
-							storage.save({
-								key: 'USER',
-								data: {
+							await AsyncStorage.setItem(
+								'@user',
+								JSON.stringify({
 									id: response.user.uid,
 									email: user[0].email,
 									name: user[0].name,
 									avatar: user[0].avatar,
-								},
-							})
+								})
+							)
 						}
 					})
 				ToastAndroid.show(
@@ -111,7 +112,7 @@ const Register = ({ navigation }) => {
 		}
 	}
 
-	const onClear = () => {
+	onClear = () => {
 		setError(null)
 		setEmail('')
 		setName('')
@@ -119,97 +120,104 @@ const Register = ({ navigation }) => {
 		setPassword2('')
 	}
 
-	return (
-		<>
-			<StatusBar backgroundColor={colors.white} barStyle='dark-content' />
-			<ScrollView showsVerticalScrollIndicator={false}>
-				<View style={styles.container}>
-					<Text style={styles.bigText}>Hello There,</Text>
-					<Text style={styles.smallText}>Sign up to continue</Text>
-					<Form style={{ marginTop: 20 }}>
-						<Item floatingLabel style={{ marginLeft: 0 }}>
-							<Label style={styles.label}>Name</Label>
-							<Input
-								selectionColor={colors.purple}
-								style={styles.input}
-								value={name}
-								keyboardType='email-address'
-								onChangeText={val => setName(val)}
-							/>
-						</Item>
-						{error && <Text style={styles.errorMsg}>{error.name}</Text>}
+	static navigationOptions = () => ({
+		header: null,
+	})
 
-						<Item floatingLabel style={{ marginLeft: 0 }}>
-							<Label style={styles.label}>Email</Label>
-							<Input
-								selectionColor={colors.purple}
-								style={styles.input}
-								value={email}
-								keyboardType='email-address'
-								onChangeText={val => setEmail(val.toLowerCase())}
-							/>
-						</Item>
-						{error && <Text style={styles.errorMsg}>{error.email}</Text>}
+	render() {
+		const { email, name, password, password2, loading, error } = this.state
+		return (
+			<>
+				<StatusBar backgroundColor={colors.white} barStyle='dark-content' />
+				<ScrollView showsVerticalScrollIndicator={false}>
+					<View style={styles.container}>
+						<Text style={styles.bigText}>Hello There,</Text>
+						<Text style={styles.smallText}>Sign up to continue</Text>
+						<Form style={{ marginTop: 20 }}>
+							<Item floatingLabel style={{ marginLeft: 0 }}>
+								<Label style={styles.label}>Name</Label>
+								<Input
+									selectionColor={colors.purple}
+									style={styles.input}
+									value={name}
+									keyboardType='email-address'
+									onChangeText={val => setName(val)}
+								/>
+							</Item>
+							{error && <Text style={styles.errorMsg}>{error.name}</Text>}
 
-						<Item floatingLabel style={{ marginLeft: 0 }}>
-							<Label style={styles.label}>Password</Label>
-							<Input
-								selectionColor={colors.purple}
-								style={styles.input}
-								value={password}
-								secureTextEntry={true}
-								onChangeText={val => setPassword(val)}
-							/>
-						</Item>
-						{error && <Text style={styles.errorMsg}>{error.password}</Text>}
+							<Item floatingLabel style={{ marginLeft: 0 }}>
+								<Label style={styles.label}>Email</Label>
+								<Input
+									selectionColor={colors.purple}
+									style={styles.input}
+									value={email}
+									keyboardType='email-address'
+									onChangeText={val =>
+										this.setState({ email: val.toLowerCase() })
+									}
+								/>
+							</Item>
+							{error && <Text style={styles.errorMsg}>{error.email}</Text>}
 
-						<Item floatingLabel style={{ marginLeft: 0 }}>
-							<Label style={styles.label}>Confirm Password</Label>
-							<Input
-								selectionColor={colors.purple}
-								style={styles.input}
-								value={password2}
-								secureTextEntry={true}
-								onChangeText={val => setPassword2(val)}
-							/>
-						</Item>
-						{error && <Text style={styles.errorMsg}>{error.password2}</Text>}
+							<Item floatingLabel style={{ marginLeft: 0 }}>
+								<Label style={styles.label}>Password</Label>
+								<Input
+									selectionColor={colors.purple}
+									style={styles.input}
+									value={password}
+									secureTextEntry={true}
+									onChangeText={val => this.setState({ password: val })}
+								/>
+							</Item>
+							{error && <Text style={styles.errorMsg}>{error.password}</Text>}
 
-						<View style={styles.clearContainer}>
-							<Text style={styles.clear} onPress={onClear}>
-								Clear
+							<Item floatingLabel style={{ marginLeft: 0 }}>
+								<Label style={styles.label}>Confirm Password</Label>
+								<Input
+									selectionColor={colors.purple}
+									style={styles.input}
+									value={password2}
+									secureTextEntry={true}
+									onChangeText={val => this.setState({ password2: val })}
+								/>
+							</Item>
+							{error && <Text style={styles.errorMsg}>{error.password2}</Text>}
+
+							<View style={styles.clearContainer}>
+								<Text style={styles.clear} onPress={this.onClear}>
+									Clear
+								</Text>
+							</View>
+						</Form>
+						{!loading ? (
+							<Button style={styles.button} onPress={this.onSubmit}>
+								<Text style={styles.btnText}>Sign Up</Text>
+							</Button>
+						) : (
+							<Button disabled={true} style={styles.buttonLoading}>
+								<ActivityIndicator size='small' color={colors.white} />
+								<Text style={[styles.btnText, { marginLeft: 5 }]}>
+									Signing you up
+								</Text>
+							</Button>
+						)}
+						<View style={styles.textBelow}>
+							<Text style={[styles.clear, { textDecorationLine: 'none' }]}>
+								Already Have Account?
+							</Text>
+							<Text
+								style={[styles.clear, { color: colors.litBlue }]}
+								onPress={() => this.props.navigation.replace('Login')}>
+								Login
 							</Text>
 						</View>
-					</Form>
-					{!loading ? (
-						<Button style={styles.button} onPress={onSubmit}>
-							<Text style={styles.btnText}>Sign Up</Text>
-						</Button>
-					) : (
-						<Button disabled={true} style={styles.buttonLoading}>
-							<ActivityIndicator size='small' color={colors.white} />
-							<Text style={[styles.btnText, { marginLeft: 5 }]}>Sign In</Text>
-						</Button>
-					)}
-					<View style={styles.textBelow}>
-						<Text style={[styles.clear, { textDecorationLine: 'none' }]}>
-							Already Have Account?
-						</Text>
-						<Text
-							style={[styles.clear, { color: colors.litBlue }]}
-							onPress={() => navigation.replace('Login')}>
-							Login
-						</Text>
 					</View>
-				</View>
-			</ScrollView>
-		</>
-	)
+				</ScrollView>
+			</>
+		)
+	}
 }
-
-Register.navigationOptions = () => ({
-	header: null,
-})
 
 const width = Dimensions.get('window').width
 const height = Dimensions.get('window').height

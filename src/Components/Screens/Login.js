@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { Component } from 'react'
 import {
 	View,
 	Text,
@@ -16,13 +16,22 @@ import { Database, Auth } from '../../Configs/Firebase'
 import AsyncStorage from '@react-native-community/async-storage'
 import storage from '../../Configs/Storage'
 
-const Login = ({ navigation }) => {
-	const [email, setEmail] = useState('')
-	const [password, setPassword] = useState('')
-	const [loading, setLoading] = useState(false)
-	const [error, setError] = useState(null)
+class Login extends Component {
+	// const [email, setEmail] = useState('')
+	// const [password, setPassword] = useState('')
+	// const [loading, setLoading] = useState(false)
+	// const [error, setError] = useState(null)
 
-	const onSubmit = async () => {
+	state = {
+		email: '',
+		password: '',
+		loading: false,
+		error: null,
+	}
+
+	onSubmit = async () => {
+		const { email, password, loading, error } = this.state
+
 		if (email === '' && password === '') {
 			setError({
 				email: 'Email Cannot Empty',
@@ -34,7 +43,7 @@ const Login = ({ navigation }) => {
 			setError({ password: 'Password Should Greater Than 6' })
 		} else {
 			try {
-				setLoading(true)
+				this.setState({ loading: true })
 				const response = await Auth.signInWithEmailAndPassword(email, password)
 				Database.ref(`/user/${response.user.uid}`).update({
 					status: 'Online',
@@ -43,114 +52,108 @@ const Login = ({ navigation }) => {
 				Database.ref('user/')
 					.orderByChild('/email')
 					.equalTo(email)
-					.once('value', result => {
+					.once('value', async result => {
 						let data = result.val()
 						if (data !== null) {
 							let user = Object.values(data)
-
-							// AsyncStorage.setItem('user.email', user[0].email)
-							// AsyncStorage.setItem('user.name', user[0].name)
-							// AsyncStorage.setItem('user.avatar', user[0].avatar)
-
-							// AsyncStorage.setItem(
-							// 	'USER',
-							// 	JSON.stringify({
-							// 		id: response.user.uid,
-							// 		email: user[0].email,
-							// 		name: user[0].name,
-							// 		avatar: user[0].avatar,
-							// 	})
-							// ).catch(e => console.log(e))
-							storage.save({
-								key: 'USER',
-								data: {
-									id: response.user.uid,
-									email: user[0].email,
-									name: user[0].name,
-									avatar: user[0].avatar,
-								},
-							})
+							try {
+								await AsyncStorage.setItem(
+									'@user',
+									JSON.stringify({
+										id: response.user.uid,
+										email: user[0].email,
+										name: user[0].name,
+										avatar: user[0].avatar,
+									})
+								)
+								ToastAndroid.show('Welcome back!', ToastAndroid.LONG)
+								this.props.navigation.replace('ChatList')
+								this.setState({ loading: false, error: null })
+							} catch (error) {
+								console.log('ERROR ASYNCSTOREAGE LOGIN', error)
+							}
 						}
 					})
-
-				ToastAndroid.show('Welcome back!', ToastAndroid.LONG)
-				navigation.replace('ChatList')
-				setLoading(false)
 			} catch (error) {
-				setError(null)
 				ToastAndroid.show(error.message, ToastAndroid.LONG)
-				setLoading(false)
+				this.setState({ loading: false, error: null })
 			}
 		}
 	}
 
-	const onClear = () => {
-		setError(null)
-		setEmail('')
-		setPassword('')
-		setLoading(false)
+	onClear = () => {
+		this.setState({
+			email: '',
+			password: '',
+			loading: false,
+			error: null,
+		})
 	}
-
-	return (
-		<>
-			<StatusBar backgroundColor={colors.white} barStyle='dark-content' />
-			<ScrollView showsVerticalScrollIndicator={false}>
-				<View style={styles.container}>
-					<Text style={styles.bigText}>Welcome Back,</Text>
-					<Text style={styles.smallText}>Sign in to continue</Text>
-					<Form style={{ marginTop: 20 }}>
-						<Item floatingLabel style={{ marginLeft: 0 }}>
-							<Label style={styles.label}>Email</Label>
-							<Input
-								selectionColor={colors.purple}
-								style={styles.input}
-								value={email}
-								keyboardType='email-address'
-								onChangeText={val => setEmail(val.toLowerCase())}
-							/>
-						</Item>
-						{error && <Text style={styles.errorMsg}>{error.email}</Text>}
-						<Item floatingLabel style={{ marginLeft: 0 }}>
-							<Label style={styles.label}>Password</Label>
-							<Input
-								selectionColor={colors.purple}
-								style={styles.input}
-								value={password}
-								secureTextEntry={true}
-								onChangeText={val => setPassword(val)}
-							/>
-						</Item>
-						{error && <Text style={styles.errorMsg}>{error.password}</Text>}
-						<View style={styles.clearContainer}>
-							<Text style={styles.clear} onPress={onClear}>
-								Clear
+	render() {
+		const { email, password, loading, error } = this.state
+		return (
+			<>
+				<StatusBar backgroundColor={colors.white} barStyle='dark-content' />
+				<ScrollView showsVerticalScrollIndicator={false}>
+					<View style={styles.container}>
+						<Text style={styles.bigText}>Welcome Back,</Text>
+						<Text style={styles.smallText}>Sign in to continue</Text>
+						<Form style={{ marginTop: 20 }}>
+							<Item floatingLabel style={{ marginLeft: 0 }}>
+								<Label style={styles.label}>Email</Label>
+								<Input
+									selectionColor={colors.purple}
+									style={styles.input}
+									value={email}
+									keyboardType='email-address'
+									onChangeText={val =>
+										this.setState({ email: val.toLowerCase() })
+									}
+								/>
+							</Item>
+							{error && <Text style={styles.errorMsg}>{error.email}</Text>}
+							<Item floatingLabel style={{ marginLeft: 0 }}>
+								<Label style={styles.label}>Password</Label>
+								<Input
+									selectionColor={colors.purple}
+									style={styles.input}
+									value={password}
+									secureTextEntry={true}
+									onChangeText={val => this.setState({ password: val })}
+								/>
+							</Item>
+							{error && <Text style={styles.errorMsg}>{error.password}</Text>}
+							<View style={styles.clearContainer}>
+								<Text style={styles.clear} onPress={this.onClear}>
+									Clear
+								</Text>
+							</View>
+						</Form>
+						{!loading ? (
+							<Button style={styles.button} onPress={this.onSubmit}>
+								<Text style={styles.btnText}>Sign In</Text>
+							</Button>
+						) : (
+							<Button disabled={true} style={styles.buttonLoading}>
+								<ActivityIndicator size='small' color={colors.white} />
+								<Text style={[styles.btnText, { marginLeft: 5 }]}>Sign In</Text>
+							</Button>
+						)}
+						<View style={styles.textBelow}>
+							<Text style={[styles.clear, { textDecorationLine: 'none' }]}>
+								Don't Have Account?
+							</Text>
+							<Text
+								style={[styles.clear, { color: colors.litBlue }]}
+								onPress={() => this.props.navigation.replace('Register')}>
+								Register
 							</Text>
 						</View>
-					</Form>
-					{!loading ? (
-						<Button style={styles.button} onPress={onSubmit}>
-							<Text style={styles.btnText}>Sign In</Text>
-						</Button>
-					) : (
-						<Button disabled={true} style={styles.buttonLoading}>
-							<ActivityIndicator size='small' color={colors.white} />
-							<Text style={[styles.btnText, { marginLeft: 5 }]}>Sign In</Text>
-						</Button>
-					)}
-					<View style={styles.textBelow}>
-						<Text style={[styles.clear, { textDecorationLine: 'none' }]}>
-							Don't Have Account?
-						</Text>
-						<Text
-							style={[styles.clear, { color: colors.litBlue }]}
-							onPress={() => navigation.replace('Register')}>
-							Register
-						</Text>
 					</View>
-				</View>
-			</ScrollView>
-		</>
-	)
+				</ScrollView>
+			</>
+		)
+	}
 }
 
 Login.navigationOptions = () => ({
