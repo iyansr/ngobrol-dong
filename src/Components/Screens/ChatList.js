@@ -38,8 +38,10 @@ class ChatList extends Component {
 			})
 		} catch (error) {
 			ToastAndroid.show(error.message, ToastAndroid.LONG)
+			this.setState({ refreshing: false })
 			console.log(error.message)
 		}
+		this.setState({ refreshing: false })
 	}
 
 	componentDidMount = async () => {

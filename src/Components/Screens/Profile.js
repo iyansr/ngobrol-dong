@@ -21,6 +21,7 @@ import RNFetchBlob from 'rn-fetch-blob'
 import ImagePicker from 'react-native-image-picker'
 import firebase from 'firebase'
 import CustomHeader from '../Layouts/Header'
+import Axios from 'axios'
 
 class Profile extends Component {
 	state = {
@@ -47,17 +48,19 @@ class Profile extends Component {
 		const parsedUser = JSON.parse(user)
 		console.log(parsedUser)
 		this.setState({ user: parsedUser })
-		fetch(
-			`https://us1.locationiq.com/v1/reverse.php?key=d17151587b1e23&lat=${parsedUser.latitude ||
-				0}&lon=${parsedUser.longitude || 0}&format=json`
-		)
-			.then(response => response.json())
-			.then(responseJson => {
-				console.log(responseJson)
-				this.setState({
-					location: `${responseJson.address.state}`,
-				})
+
+		try {
+			const response = await Axios.get(
+				`https://us1.locationiq.com/v1/reverse.php?key=d17151587b1e23&lat=${parsedUser.latitude ||
+					0}&lon=${parsedUser.longitude || 0}&format=json`
+			)
+
+			this.setState({
+				location: `${response.data.address.state}`,
 			})
+		} catch (error) {
+			console.log(error)
+		}
 	}
 
 	editName = async () => {

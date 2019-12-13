@@ -127,7 +127,7 @@ class Chat extends Component {
 					}}>
 					<Icon
 						type='FontAwesome5'
-						name='fighter-jet'
+						name='paper-plane'
 						style={{ color: colors.white }}
 					/>
 				</View>

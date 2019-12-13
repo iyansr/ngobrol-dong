@@ -15,12 +15,8 @@ import storage from '../../Configs/Storage'
 import { colors } from '../../Theme/colors'
 import { PoppinsBold, PoppinsRegular } from '../../Theme/fonts'
 import { Icon, Button } from 'native-base'
-import Dialog from 'react-native-dialog'
-import { Database, Auth } from '../../Configs/Firebase'
-import RNFetchBlob from 'rn-fetch-blob'
-import ImagePicker from 'react-native-image-picker'
-import firebase from 'firebase'
 import CustomHeader from '../Layouts/Header'
+import Axios from 'axios'
 
 class FriendsProfile extends Component {
 	state = {
@@ -31,19 +27,20 @@ class FriendsProfile extends Component {
 		location: '',
 	}
 
-	componentDidMount() {
-		fetch(
-			`https://us1.locationiq.com/v1/reverse.php?key=d17151587b1e23&lat=${this
-				.state.user.latitude || 0}&lon=${this.state.user.longitude ||
-				0}&format=json`
-		)
-			.then(response => response.json())
-			.then(responseJson => {
-				console.log(responseJson)
-				this.setState({
-					location: `${responseJson.address.state}`,
-				})
+	componentDidMount = async () => {
+		try {
+			const response = await Axios.get(
+				`https://us1.locationiq.com/v1/reverse.php?key=d17151587b1e23&lat=${this
+					.state.user.latitude || 0}&lon=${this.state.user.longitude ||
+					0}&format=json`
+			)
+
+			this.setState({
+				location: `${response.data.address.state}`,
 			})
+		} catch (error) {
+			console.log(error)
+		}
 	}
 
 	render() {

@@ -72,12 +72,12 @@ class MapView extends Component {
 		}
 		if (status === PermissionsAndroid.RESULTS.DENIED) {
 			ToastAndroid.show(
-				'Location Permission Denied By User.',
+				'Location Permission Has Been Denied',
 				ToastAndroid.LONG
 			)
 		} else if (status === PermissionsAndroid.RESULTS.NEVER_ASK_AGAIN) {
 			ToastAndroid.show(
-				'Location Permission Revoked By User.',
+				'Location Permission Has Been Revoked',
 				ToastAndroid.LONG
 			)
 		}
