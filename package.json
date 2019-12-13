@@ -12,7 +12,7 @@
   "dependencies": {
     "@react-native-community/async-storage": "^1.6.3",
     "expo-font": "^7.0.0",
-    "firebase": "^7.5.2",
+    "firebase": "^7.6.0",
     "jetifier": "^1.6.5",
     "native-base": "^2.13.8",
     "react": "16.9.0",
