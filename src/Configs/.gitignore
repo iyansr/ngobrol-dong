@@ -1,3 +1,5 @@
 *
 !.gitignore
 !Firebase.sample.js
+!MapBoxAPI.sample.js
+!Storage.js

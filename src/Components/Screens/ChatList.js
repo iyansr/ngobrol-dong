@@ -1,83 +1,88 @@
-import React from 'react'
-import {
-	View,
-	// Text,
-	StyleSheet,
-	ScrollView,
-	Dimensions,
-	ToastAndroid,
-} from 'react-native'
-import {
-	Container,
-	Header,
-	Content,
-	List,
-	ListItem,
-	Left,
-	Body,
-	Right,
-	Thumbnail,
-	Text,
-	Button,
-} from 'native-base'
+import React, { Component } from 'react'
+import { View, Dimensions, ToastAndroid, RefreshControl } from 'react-native'
+
 import CustomHeader from '../Layouts/Header'
 import { colors } from '../../Theme/colors'
-const ChatList = ({ navigation }) => {
-	const ar = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-	return (
-		<View style={{ backgroundColor: colors.whiteChoco }}>
-			<ScrollView
-				contentContainerStyle={{ marginVertical: 10 }}
-				showsHorizontalScrollIndicator={false}
-				showsVerticalScrollIndicator={false}>
-				{ar.map((_, id) => {
-					return (
-						<ListItem
-							avatar
-							key={id}
-							style={styles.listItem}
-							onPress={() => navigation.navigate('Chat')}>
-							<Left>
-								<Button transparent onPress={() => alert('Image')}>
-									<Thumbnail
-										source={{
-											uri:
-												'https://i.pinimg.com/originals/a6/e6/dc/a6e6dc0280edc6f5dabadd3b4eb0787a.jpg',
-										}}
-									/>
-								</Button>
-							</Left>
-							<Body>
-								<Text>Kumar Pratik</Text>
-								<Text note>
-									Doing what you like will always keep you happy . .
-								</Text>
-							</Body>
-							<Right>
-								<Text note>3:43 pm</Text>
-							</Right>
-						</ListItem>
-					)
-				})}
-			</ScrollView>
-		</View>
-	)
+import ChatListItem from '../Layouts/ChatListItem'
+import storage from '../../Configs/Storage'
+import AsyncStorage from '@react-native-community/async-storage'
+import { Database } from '../../Configs/Firebase'
+
+class ChatList extends Component {
+	state = {
+		name: '',
+		userList: [],
+		refreshing: true,
+		refresh: false,
+		userId: null,
+	}
+
+	getUser = async () => {
+		try {
+			const data = await AsyncStorage.getItem('@user')
+			const usr = JSON.parse(data)
+			this.setState({
+				name: usr.name,
+				userId: usr.id,
+			})
+			Database.ref('/user').on('child_added', value => {
+				let person = value.val()
+				if (person.id !== this.state.userId) {
+					this.setState(prev => {
+						return {
+							userList: [...prev.userList, person],
+							refreshing: false,
+						}
+					})
+				}
+			})
+		} catch (error) {
+			ToastAndroid.show(error.message, ToastAndroid.LONG)
+			this.setState({ refreshing: false })
+			console.log(error.message)
+		}
+		this.setState({ refreshing: false })
+	}
+
+	componentDidMount = async () => {
+		await this.getUser()
+	}
+
+	render() {
+		return (
+			<>
+				<CustomHeader headerTitle={`Hi, ${this.state.name}`} />
+				<View
+					style={{
+						backgroundColor: colors.white,
+						height: Dimensions.get('window').height,
+					}}>
+					<ChatListItem
+						refreshControl={
+							<RefreshControl
+								onRefresh={async () => {
+									if (this.state.userList.length > 0) {
+										this.setState({
+											userList: [],
+										})
+									}
+									this.setState({ refresh: true })
+									await this.getUser()
+									this.setState({ refresh: false })
+								}}
+								refreshing={this.state.refresh}
+							/>
+						}
+						userList={this.state.userList}
+						refreshing={this.state.refreshing}
+						changePage={item =>
+							this.props.navigation.navigate('Chat', { item })
+						}
+					/>
+				</View>
+			</>
+		)
+	}
 }
-
-ChatList.navigationOptions = () => ({
-	header: <CustomHeader headerTitle='Chat Room' />,
-})
-
-const styles = StyleSheet.create({
-	listItem: {
-		backgroundColor: colors.white,
-		// marginVertical: 5,
-		paddingHorizontal: 15,
-		marginRight: 10,
-		marginLeft: 10,
-		// elevation: 5,
-		// borderRadius: 5,
-	},
-})
 
 export default ChatList

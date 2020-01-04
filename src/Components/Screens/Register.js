@@ -12,31 +12,43 @@ import {
 import { PoppinsBold, PoppinsRegular } from '../../Theme/fonts'
 import { colors } from '../../Theme/colors'
 import { Input, Form, Label, Item, Button } from 'native-base'
-import { Database, Auth } from '../../Configs/Firebase'
+import { Auth, Database } from '../../Configs/Firebase'
 import AsyncStorage from '@react-native-community/async-storage'
 import storage from '../../Configs/Storage'
 
-class Login extends Component {
+class Register extends Component {
 	// const [email, setEmail] = useState('')
+	// const [name, setName] = useState('')
 	// const [password, setPassword] = useState('')
+	// const [password2, setPassword2] = useState('')
 	// const [loading, setLoading] = useState(false)
 	// const [error, setError] = useState(null)
 
 	state = {
 		email: '',
+		name: '',
 		password: '',
+		password2: '',
 		loading: false,
 		error: null,
 	}
 
 	onSubmit = async () => {
-		const { email, password, loading, error } = this.state
-
-		if (email === '' && password === '') {
+		const { email, name, password, password2, loading, error } = this.state
+		const pattern = /^\w+@[a-zA-Z_]+?\.[a-zA-Z]{2,3}$/
+		if (email === '' && password === '' && password2 === '' && name === '') {
 			this.setState({
 				error: {
+					name: 'Name Cannot Empty',
 					email: 'Email Cannot Empty',
 					password: 'Password Cannot Empty',
+					password2: 'Password Cannot Empty',
+				},
+			})
+		} else if (!pattern.test(email)) {
+			this.setState({
+				error: {
+					name: 'Invalid Email Format',
 				},
 			})
 		} else if (password === '') {
@@ -48,45 +60,75 @@ class Login extends Component {
 		} else if (password.length < 6) {
 			this.setState({
 				error: {
-					password: 'Password Should Greater Than 6',
+					password: 'Password should be atleast 6 characters',
+				},
+			})
+		} else if (password2 !== password) {
+			this.setState({
+				error: {
+					password2: 'Password must match',
 				},
 			})
 		} else {
 			try {
-				this.setState({ loading: true })
-				const response = await Auth.signInWithEmailAndPassword(email, password)
-				Database.ref(`/user/${response.user.uid}`).update({
-					status: 'Online',
+				this.setState({
+					loading: true,
+				})
+				const response = await Auth.createUserWithEmailAndPassword(
+					email,
+					password
+				)
+
+				Auth.currentUser.updateProfile({
+					displayName: name,
+					photoURL:
+						'https://res.cloudinary.com/iyansrcloud/image/upload/v1575295609/upload/genre-icon/comedy_io7bh2.png',
 				})
 
-				Database.ref('user/')
-					.orderByChild('/email')
+				await Database.ref(`/user/${response.user.uid}`).set({
+					id: response.user.uid,
+					name,
+					status: 'Online',
+					email,
+					avatar:
+						'https://res.cloudinary.com/iyansrcloud/image/upload/v1575295609/upload/genre-icon/comedy_io7bh2.png',
+				})
+
+				await Database.ref('user/')
+					.orderByChild('email/')
 					.equalTo(email)
 					.once('value', async result => {
 						let data = result.val()
 						if (data !== null) {
 							let user = Object.values(data)
-							try {
-								await AsyncStorage.setItem(
-									'@user',
-									JSON.stringify({
-										id: response.user.uid,
-										email: user[0].email,
-										name: user[0].name,
-										avatar: user[0].avatar,
-									})
-								)
-								ToastAndroid.show('Welcome back!', ToastAndroid.LONG)
-								this.props.navigation.replace('ChatList')
-								this.setState({ loading: false, error: null })
-							} catch (error) {
-								console.log('ERROR ASYNCSTOREAGE LOGIN', error)
-							}
+							await AsyncStorage.setItem(
+								'@user',
+								JSON.stringify({
+									id: response.user.uid,
+									email: user[0].email,
+									name: user[0].name,
+									avatar: user[0].avatar,
+								})
+							)
 						}
 					})
+				ToastAndroid.show(
+					'Your account is successfully registered!',
+					ToastAndroid.LONG
+				)
+				Auth.signInWithEmailAndPassword(email, password)
+				this.props.navigation.replace('ChatList')
+				this.setState({
+					loading: false,
+					error: null,
+				})
 			} catch (error) {
 				ToastAndroid.show(error.message, ToastAndroid.LONG)
-				this.setState({ loading: false, error: null })
+				this.setState({
+					loading: false,
+					error: null,
+				})
+				console.log(error)
 			}
 		}
 	}
@@ -94,21 +136,40 @@ class Login extends Component {
 	onClear = () => {
 		this.setState({
 			email: '',
+			name: '',
 			password: '',
+			password2: '',
 			loading: false,
 			error: null,
 		})
 	}
+
+	static navigationOptions = () => ({
+		header: null,
+	})
+
 	render() {
-		const { email, password, loading, error } = this.state
+		const { email, name, password, password2, loading, error } = this.state
 		return (
 			<>
 				<StatusBar backgroundColor={colors.white} barStyle='dark-content' />
 				<ScrollView showsVerticalScrollIndicator={false}>
 					<View style={styles.container}>
-						<Text style={styles.bigText}>Welcome Back,</Text>
-						<Text style={styles.smallText}>Sign in to continue</Text>
+						<Text style={styles.bigText}>Hello There,</Text>
+						<Text style={styles.smallText}>Sign up to continue</Text>
 						<Form style={{ marginTop: 20 }}>
+							<Item floatingLabel style={{ marginLeft: 0 }}>
+								<Label style={styles.label}>Name</Label>
+								<Input
+									selectionColor={colors.purple}
+									style={styles.input}
+									value={name}
+									keyboardType='email-address'
+									onChangeText={val => this.setState({ name: val })}
+								/>
+							</Item>
+							{error && <Text style={styles.errorMsg}>{error.name}</Text>}
+
 							<Item floatingLabel style={{ marginLeft: 0 }}>
 								<Label style={styles.label}>Email</Label>
 								<Input
@@ -122,6 +183,7 @@ class Login extends Component {
 								/>
 							</Item>
 							{error && <Text style={styles.errorMsg}>{error.email}</Text>}
+
 							<Item floatingLabel style={{ marginLeft: 0 }}>
 								<Label style={styles.label}>Password</Label>
 								<Input
@@ -133,6 +195,19 @@ class Login extends Component {
 								/>
 							</Item>
 							{error && <Text style={styles.errorMsg}>{error.password}</Text>}
+
+							<Item floatingLabel style={{ marginLeft: 0 }}>
+								<Label style={styles.label}>Confirm Password</Label>
+								<Input
+									selectionColor={colors.purple}
+									style={styles.input}
+									value={password2}
+									secureTextEntry={true}
+									onChangeText={val => this.setState({ password2: val })}
+								/>
+							</Item>
+							{error && <Text style={styles.errorMsg}>{error.password2}</Text>}
+
 							<View style={styles.clearContainer}>
 								<Text style={styles.clear} onPress={this.onClear}>
 									Clear
@@ -141,22 +216,24 @@ class Login extends Component {
 						</Form>
 						{!loading ? (
 							<Button style={styles.button} onPress={this.onSubmit}>
-								<Text style={styles.btnText}>Sign In</Text>
+								<Text style={styles.btnText}>Sign Up</Text>
 							</Button>
 						) : (
 							<Button disabled={true} style={styles.buttonLoading}>
 								<ActivityIndicator size='small' color={colors.white} />
-								<Text style={[styles.btnText, { marginLeft: 5 }]}>Sign In</Text>
+								<Text style={[styles.btnText, { marginLeft: 5 }]}>
+									Signing you up
+								</Text>
 							</Button>
 						)}
 						<View style={styles.textBelow}>
 							<Text style={[styles.clear, { textDecorationLine: 'none' }]}>
-								Don't Have Account?
+								Already Have Account?
 							</Text>
 							<Text
 								style={[styles.clear, { color: colors.litBlue }]}
-								onPress={() => this.props.navigation.replace('Register')}>
-								Register
+								onPress={() => this.props.navigation.replace('Login')}>
+								Login
 							</Text>
 						</View>
 					</View>
@@ -166,23 +243,10 @@ class Login extends Component {
 	}
 }
 
-Login.navigationOptions = () => ({
-	header: null,
-})
-
 const width = Dimensions.get('window').width
 const height = Dimensions.get('window').height
 
 const styles = StyleSheet.create({
-	textBelow: {
-		width: '100%',
-		height: 30,
-		flexDirection: 'column',
-		justifyContent: 'center',
-		alignContent: 'center',
-		alignItems: 'center',
-		marginTop: 20,
-	},
 	container: {
 		paddingVertical: 70,
 		paddingHorizontal: 30,
@@ -197,6 +261,15 @@ const styles = StyleSheet.create({
 		height: 20,
 		flexDirection: 'row-reverse',
 		marginTop: 10,
+	},
+	textBelow: {
+		width: '100%',
+		height: 30,
+		flexDirection: 'column',
+		justifyContent: 'center',
+		alignContent: 'center',
+		alignItems: 'center',
+		marginTop: 20,
 	},
 	clear: {
 		textDecorationLine: 'underline',
@@ -256,4 +329,4 @@ const styles = StyleSheet.create({
 		color: colors.grey,
 	},
 })
-export default Login
+export default Register
