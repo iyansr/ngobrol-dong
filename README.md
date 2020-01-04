@@ -3,8 +3,9 @@
 Ngobrol is chat application that user track friends location, built with React Native integrated with Firebase and Mapbox
 
 <div align='center'>
-    <img title="MIT license" src="https://res.cloudinary.com/iyansrcloud/image/upload/v1578126208/screenshot/banner_fwvuaf.png" width='700'>
+    <img title="MIT license" src="https://res.cloudinary.com/iyansrcloud/image/upload/v1578126208/screenshot/banner_fwvuaf.png"                    width='700'>
 </div>
+
 
 <div align='center'>
   <a href="https://opensource.org/licenses/MIT">
@@ -99,13 +100,12 @@ Ngobrol is chat application that user track friends location, built with React N
 
 ## Screenshots
 
+<div align='center'>
 <img title="Home" src="https://res.cloudinary.com/iyansrcloud/image/upload/v1578125626/screenshot/ChatList_qf0yog.png" width='400'>
-
 <img title="Chat Screen" src="https://res.cloudinary.com/iyansrcloud/image/upload/v1578125627/screenshot/chatscreen_thlytj.png" width='400'>
-
 <img title="Map Screen" src="https://res.cloudinary.com/iyansrcloud/image/upload/v1578125627/screenshot/map_s3ktnf.png" width='400'>
-
 <img title="Profile Screen" src="https://res.cloudinary.com/iyansrcloud/image/upload/v1578125627/screenshot/profile_y1lfzs.png" width='400'>
+</div>
 
 ---
 
