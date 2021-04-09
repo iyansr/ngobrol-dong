@@ -14,7 +14,7 @@
     "@react-native-mapbox-gl/maps": "^7.0.8",
     "axios": "^0.19.0",
     "expo-font": "^7.0.0",
-    "firebase": "^7.5.2",
+    "firebase": "^8.3.3",
     "jetifier": "^1.6.5",
     "native-base": "^2.13.8",
     "react": "16.9.0",
